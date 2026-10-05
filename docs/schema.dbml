@@ -1,0 +1,84 @@
+Enum transaction_source {
+  manual
+  import
+}
+
+Enum categorized_by {
+  user
+  rule
+  embedding
+  llm
+}
+
+Table users {
+  id uuid [pk, default: `gen_random_uuid()`]
+  email varchar [not null, unique]
+  password_hash varchar [not null]
+  created_at timestamp [not null, default: `now()`]
+}
+
+Table categories {
+  id uuid [pk, default: `gen_random_uuid()`]
+  user_id uuid [not null]
+  category_name varchar [not null]
+  created_at timestamp [not null, default: `now()`]
+
+  indexes {
+    (user_id, category_name) [unique]
+  }
+}
+
+Table transactions {
+  id uuid [pk, default: `gen_random_uuid()`]
+  user_id uuid [not null]
+  transaction_date date [not null]
+  amount_centavos integer [not null, note: 'signed: negative = expense, positive = income']
+  description varchar [not null]
+  merchant_normalized varchar
+  category_id uuid [null, note: 'null = uncategorized']
+  categorized_by categorized_by [null]
+  source transaction_source [not null]
+  import_hash varchar [null, note: 'null for manual entries']
+  created_at timestamp [not null, default: `now()`]
+  updated_at timestamp [not null, default: `now()`]
+
+  indexes {
+    (user_id, transaction_date)
+    (user_id, category_id)
+    (user_id, import_hash) [unique]
+  }
+}
+
+Table budgets {
+  id uuid [pk, default: `gen_random_uuid()`]
+  user_id uuid [not null]
+  category_id uuid [not null]
+  month date [not null, note: 'always the 1st of the month']
+  limit_centavos integer [not null]
+
+  indexes {
+    (user_id, category_id, month) [unique]
+  }
+}
+
+Table merchant_rules {
+  id uuid [pk, default: `gen_random_uuid()`]
+  user_id uuid [not null]
+  merchant_pattern varchar [not null]
+  category_id uuid [not null]
+  created_at timestamp [not null, default: `now()`]
+  updated_at timestamp [not null, default: `now()`]
+
+  indexes {
+    (user_id, merchant_pattern) [unique]
+  }
+}
+
+Ref: categories.user_id > users.id [delete: cascade]
+Ref: transactions.user_id > users.id [delete: cascade]
+Ref: budgets.user_id > users.id [delete: cascade]
+Ref: merchant_rules.user_id > users.id [delete: cascade]
+
+Ref: transactions.category_id > categories.id [delete: set null]
+Ref: budgets.category_id > categories.id [delete: cascade]
+Ref: merchant_rules.category_id > categories.id [delete: cascade]

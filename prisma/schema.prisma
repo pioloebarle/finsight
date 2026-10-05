@@ -1,0 +1,114 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum TransactionSource {
+  MANUAL @map("manual")
+  IMPORT @map("import")
+
+  @@map("transaction_source") 
+}
+
+enum CategorizedBy {
+  USER      @map("user")
+  RULE      @map("rule")
+  EMBEDDING @map("embedding")
+  LLM       @map("llm")
+
+  @@map("categorized_by") 
+}
+
+model User {
+  id             String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  email          String      @unique 
+  passwordHash   String      @map("password_hash")
+  createdAt      DateTime    @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  categories        Category[]
+  transactions      Transaction[]
+  budgets           Budget[]
+  merchantRules     MerchantRule[]
+  @@map("users")
+}
+
+model Category {
+  id            String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId        String      @map("user_id") @db.Uuid
+  categoryName  String      @map("category_name")
+  createdAt     DateTime    @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  transactions  Transaction[]
+  budgets       Budget[]
+  merchantRules MerchantRule[]
+
+  @@unique([userId, categoryName])
+  @@map("categories")
+}
+
+model Transaction {
+  id                  String              @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId              String              @map("user_id") @db.Uuid
+  transactionDate     DateTime            @map("transaction_date") @db.Date
+  amountCentavos      Int                 @map("amount_centavos")
+  description         String  
+  merchantNormalized  String?             @map("merchant_normalized")
+  categoryId          String?             @map("category_id") @db.Uuid
+  categorizedBy       CategorizedBy?      @map("categorized_by")
+  source              TransactionSource
+  importHash          String?             @map("import_hash")
+  createdAt           DateTime            @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt           DateTime            @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  user                User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category            Category?           @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+
+  @@unique([userId, importHash])
+  @@index([userId, transactionDate])
+  @@index([userId, categoryId])
+
+  @@map("transactions")
+}
+
+model Budget {
+  id            String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId        String      @map("user_id") @db.Uuid
+  categoryId    String      @map("category_id") @db.Uuid
+  month         DateTime    @db.Date
+  limitCentavos Int         @map("limit_centavos")
+
+  user                User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category            Category           @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, categoryId, month])
+
+  @@map("budgets")
+}
+
+model MerchantRule {
+  id                  String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId              String      @map("user_id") @db.Uuid
+  merchantPattern     String      @map("merchant_pattern")
+  categoryId          String      @map("category_id") @db.Uuid
+  createdAt           DateTime    @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt           DateTime    @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  user                User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category            Category           @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, merchantPattern])
+
+  @@map("merchant_rules")
+}
+
