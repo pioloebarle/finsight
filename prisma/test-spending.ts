@@ -1,8 +1,5 @@
 import "dotenv/config";
 import { getSpendingByCategory } from "../src/lib/queries/spending";
-import { PrismaClient } from "../src/generated/prisma/client";
-import { PrismaPg } from "@prisma/adapter-pg";
-import pg from "pg";
 
 
 async function runTest() {
