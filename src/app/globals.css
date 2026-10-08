@@ -73,6 +73,9 @@
   --color-category-subscriptions: #6c63c9;
   --color-category-uncategorized: #d79a24;
 
+  --color-finsight-income: #15803d;   /* green-700 */
+  --color-finsight-expense: #b91c1c;  /* red-700 */
+
 
   /* -------------------------------------------------------
      Typography

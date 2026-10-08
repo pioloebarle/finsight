@@ -6,7 +6,11 @@ import {
   CalendarDays,
   Car,
   CircleHelp,
+  Wallet,
+  type LucideIcon,
 } from "lucide-react";
+
+type CategoryConfig = { name: string; icon: LucideIcon };
 
 export const categoryConfig = {
   bills: {
@@ -29,8 +33,8 @@ export const categoryConfig = {
     icon: Utensils,
   },
 
-  subscription: {
-    name: "Subscription",
+  subscriptions: {
+    name: "Subscriptions",
     icon: CalendarDays,
   },
 
@@ -43,4 +47,17 @@ export const categoryConfig = {
     name: "Uncategorized",
     icon: CircleHelp,
   },
+
+  salary: {
+    name: "Salary",
+    icon: Wallet,
+  }
 };
+
+export function getCategoryConfig(name: string | null): CategoryConfig {
+  const key = (name ?? "uncategorized").toLowerCase();
+  return categoryConfig[key as keyof typeof categoryConfig] ?? {
+    name: name ?? "Uncategorized",
+    icon: CircleHelp,
+  };
+}

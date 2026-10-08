@@ -1,9 +1,18 @@
-import { ChevronRight } from 'lucide-react';
-import { transactions, transactionColumns } from './data/mockData';
-import { categoryConfig } from './data/categories'
-import { formatDate, formatCurrency } from '@/lib/format';
+import { ChevronRight, Wallet } from 'lucide-react';
+import { getCategoryConfig } from '../data/categories';
+import { formatDate, formatSignedCurrency } from '@/lib/format';
 
-export default function Transactions() {
+type Transaction = {
+    id: string;
+    description: string;
+    categoryName: string | null;
+    amountCentavos: number;
+    transactionDate: Date;
+}
+export default function Transactions({ transactions }: { transactions: Transaction[] }) {
+    const transactionColumns =
+        "grid grid-cols-[1fr_auto_24px] items-center gap-4 sm:grid-cols-[2.2fr_1.3fr_1.3fr_1fr_24px]";
+    
     return (
         <div className="mt-6 w-full rounded-finsight-lg border border-finsight-gray-500 bg-white p-6">
         <div className="mb-4 flex w-full items-center justify-between">
@@ -24,14 +33,23 @@ export default function Transactions() {
         </div>
 
         {transactions.slice(0, 5).map((transaction) => {
-            const config = categoryConfig[
-                transaction.categoryName as keyof typeof categoryConfig
-            ];
+            const categoryName = 
+                transaction.categoryName || "uncategorized";
+                
+            const isIncome = transaction.amountCentavos > 0;
+            const isExpense = transaction.amountCentavos < 0;
+
+            const config = isIncome && categoryName === null
+                ? { name: "Salary", icon: Wallet }
+                : getCategoryConfig(categoryName);
+
             const Icon = config.icon;
+
+
 
             return (
             <div
-                key={transaction.description}
+                key={transaction.id}
                 className={`${transactionColumns} group border-t border-finsight-border-light px-1 py-3.5 transition-colors hover:bg-finsight-surface-soft`}
             >
                 {/* 1. Description: icon AND text in the same cell */}
@@ -51,12 +69,20 @@ export default function Transactions() {
 
                 {/* 3. Date */}
                 <span className="hidden whitespace-nowrap text-sm text-finsight-muted sm:block">
-                {formatDate(transaction.date)}
+                {formatDate(transaction.transactionDate)}
                 </span>
 
                 {/* 4. Amount */}
-                <span className="text-right text-sm font-semibold text-finsight-text">
-                {formatCurrency(transaction.amountCentavos)}
+                <span className={`text-right text-sm font-semibold tabular-nums
+                    ${isIncome 
+                        ? "text-finsight-income"
+                        : isExpense
+                        ? "text-finsight-expense"
+                        : "text-finsight-text"
+                    }
+                `}>
+                <span className="sr-only">{isIncome ? "Income " : isExpense ? "Expense " : ""}</span>
+                {formatSignedCurrency(transaction.amountCentavos)}
                 </span>
 
                 {/* 5. Chevron */}

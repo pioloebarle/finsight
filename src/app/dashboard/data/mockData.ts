@@ -25,9 +25,6 @@ export const transactions = [
 
 export const totalCentavos = transactions.reduce((total, category) => total + category.amountCentavos, 0);
 
-export const transactionColumns =
-    "grid grid-cols-[1fr_auto_24px] items-center gap-4 sm:grid-cols-[2.2fr_1.3fr_1.3fr_1fr_24px]";
-
 const totalsByCategory = transactions.reduce<Record<string, number>>((totals, transaction) => {
     totals[transaction.categoryName] = (totals[transaction.categoryName] ?? 0) + transaction.amountCentavos;
     return totals; 
