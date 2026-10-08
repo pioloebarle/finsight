@@ -26,3 +26,12 @@ export function parseMonthOrCurrent(
 export function monthToDate({ year, month }: ParsedMonth): Date {
     return new Date(Date.UTC(year, month - 1, 1));
 }
+
+export function monthRange(month: Date): { start: Date; end: Date } {
+    const year = month.getUTCFullYear();
+    const monthIndex = month.getUTCMonth();
+    return {
+        start: new Date(Date.UTC(year, monthIndex, 1)),
+        end: new Date(Date.UTC(year,monthIndex + 1, 1)),
+    };
+}
