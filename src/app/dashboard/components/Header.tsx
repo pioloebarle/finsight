@@ -10,21 +10,18 @@ export default function Header({ categories }: { categories: CategoryOptions[] }
     return (
         <div>
             {/* Header */}
-            <div className="flex items-center justify-between">
-                <Image 
-                src="/logo.png"
-                alt="FinSight Logo"
-                width={2079}
-                height={756}
-                className="h-[50px] w-auto"
-                priority
-                />
+            <header className="flex min-h-14 items-center justify-between gap-4">
+                    
+                <h1 className="text-2xl font-semibold tracking-tight text-finsight-text sm:text-3xl">
+                    Dashboard
+                </h1>
+
 
                 <button
                     onClick = {() => setIsOpen(true)} 
                     className="flex items-center gap-2 bg-finsight-primary text-finsight-background p-3 rounded-finsight-lg font-medium hover:bg-finsight-primary-hover"
                 >
-                    <Plus className="w-4 h-4" /> Add Transaction
+                    <Plus className="w-4 h-4" /> Add New Transaction
                 </button>
 
                 {isOpen && (
@@ -34,7 +31,7 @@ export default function Header({ categories }: { categories: CategoryOptions[] }
                         categories = {categories}
                     />
                 )}
-            </div>
+            </header>
         </div>
     )
 }

@@ -42,7 +42,7 @@ export default async function DashboardPage({ searchParams,}: PageProps) {
 
   return (
     <main className="min-h-screen bg-finsight-background">
-      <div className="mx-auto w-full max-w-7xl px-5 py-8 lg:px-6">
+      <div className="mx-auto w-full max-w-screen-2xl px-5 py-8 lg:px-6">
           <Header categories={categories} />
 
           <hr className="my-3 border-t border-gray-300 mb-10" />
