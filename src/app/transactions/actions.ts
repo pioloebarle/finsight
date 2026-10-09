@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { transactionSchema } from "@/lib/validation/transaction";
 import { toTransactionRow } from "@/lib/transactions";
 import type { CreateTransactionResult } from "@/types/dashboard"
+import { createTransactionForUser } from "@/lib/transactionService";
 
 export async function createTransaction(formData: FormData): Promise<CreateTransactionResult> {
     const userId = process.env.DEV_USER_ID;
@@ -35,45 +36,24 @@ export async function createTransaction(formData: FormData): Promise<CreateTrans
     }
 
     try {
-        if (result.data.categoryId) {
-            const category = await prisma.category.findFirst({
-                where: {
-                    id: result.data.categoryId,
-                    userId,
-                },
-                select: { id: true },
-            });
+        const serviceResult = await createTransactionForUser(
+            userId,
+            result.data
+        );
 
-            if (!category) {
-                return {
-                    success: false,
-                    message: "Invalid category selected. Please try again.",
-                };
-            }
+        if (!serviceResult.success) {
+            return serviceResult;
         }
-
-        const transactionRow = toTransactionRow(result.data);
-
-        await prisma.transaction.create({
-            data: {
-                userId,
-                ...transactionRow,
-            },
-        });
 
         revalidatePath("/dashboard");
 
-        return {
-            success: true,
-            description: result.data.description,
-            amountCentavos: transactionRow.amountCentavos,
-        };
-    } catch (error) {
-        console.error("Failed to create transaction:", error);
-        return {
-            success: false,
-            message: "An unexpected error occurred. Please try again.",
-        };
+        return serviceResult;
+        } catch (error) {
+            console.error("Failed to create transaction:", error);
+            return {
+                success: false,
+                message: "An unexpected error occurred. Please try again.",
+            };
     }
 
 }
