@@ -8,9 +8,13 @@ import {
     Check,
     CircleHelp,
     X,
+    Loader2,
 } from "lucide-react";
+import { toast } from "sonner";
+import { formatSignedCurrency } from "@/lib/format";
 import type { CategoryOption } from "@/types/dashboard";
 import { getCategoryConfig } from "../data/categories";
+import { createTransaction } from "@/app/transactions/actions";
 
 type TransactionType = "income" | "expense";
 
@@ -18,6 +22,10 @@ export default function TransactionModal({isOpen, onClose, categories}: {isOpen:
     const [type, setType] = useState<TransactionType>("expense");
     const [isCategoryOpen, setIsCategoryOpen] = useState(false);
     const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+    const [submitError, setSubmitError] = useState<string | null>(null);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [fieldErrors, setFieldErrors] = useState<Record<string, string[] | undefined>>({});
+
 
     useEffect(() => {
     if (!isOpen) return;
@@ -27,6 +35,41 @@ export default function TransactionModal({isOpen, onClose, categories}: {isOpen:
         window.addEventListener("keydown", onKeyDown);
         return () => window.removeEventListener("keydown", onKeyDown);
     }, [isOpen, onClose]);
+
+    async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+        event.preventDefault();
+
+        if(isSubmitting) return; 
+
+        const formData = new FormData(event.currentTarget);
+
+        setIsSubmitting(true);
+        setSubmitError(null);
+        setFieldErrors({});
+
+        try {
+            const result = await createTransaction(formData);
+            
+            if (!result.success) {
+                setFieldErrors(result.errors ?? {});
+                setSubmitError(result.message ?? "An error occurred. Please try again.");
+                return;
+            }
+
+            setFieldErrors({});
+            
+            onClose();
+            toast.success("Transaction added", {
+                description: `${result.description} · ${formatSignedCurrency(result.amountCentavos ?? 0)}`,
+            });
+
+        } catch (error) {
+            console.error("Failed to submit transaction:", error);
+            setSubmitError("An unexpected error occurred. Please try again.");
+        } finally {
+            setIsSubmitting(false);
+        }
+    }
 
     if (!isOpen) {
         return null;
@@ -73,7 +116,7 @@ export default function TransactionModal({isOpen, onClose, categories}: {isOpen:
                 </div>
 
                 {/* Form */}
-                <form className="space-y-6">
+                <form onSubmit={handleSubmit} className="space-y-6">
                     <input type="hidden" name="type" value={type} />
                     <input type="hidden" name="categoryId" value={selectedCategory ?? ""} />    
                     {/* Transaction Type */}
@@ -137,9 +180,15 @@ export default function TransactionModal({isOpen, onClose, categories}: {isOpen:
                             type="text"
                             required
                             placeholder="e.g. Groceries, Salary, etc."
-                            maxLength={100}
+                            maxLength={50}
                             className="h-12 w-full rounded-xl border border-finsight-border bg-white px-4 text-base text-finsight-text outline-none transition-all placeholder:text-finsight-muted focus:border-finsight-primary focus:ring-3 focus:ring-finsight-primary-soft"
                         />
+
+                        {fieldErrors.description?.[0] && (
+                            <p className="text-sm text-red-600">
+                                {fieldErrors.description[0]}
+                            </p>
+                        )}
 
                         {/* <div className="mt-1.5 flex justify-end">
                             <span className="text-base text-finsight-muted">
@@ -204,7 +253,7 @@ export default function TransactionModal({isOpen, onClose, categories}: {isOpen:
 
                     {/* Category */}
                     <div>
-                        <label
+                        <span
                             id="category-label"
                             className="mb-2 block text-base font-semibold text-finsight-text"
                         >
@@ -212,12 +261,15 @@ export default function TransactionModal({isOpen, onClose, categories}: {isOpen:
                             <span className="font-normal text-finsight-muted">
                                 (Optional)
                             </span>
-                        </label>
+                        </span>
 
                         <div className="relative">
                             {/* Category Selector */}
                             <button
                                 type="button"
+                                aria-labelledby="category-label"
+                                aria-haspopup="listbox"
+                                aria-expanded={isCategoryOpen}
                                 onClick={() => setIsCategoryOpen((open) => !open)}
                                 className={`flex h-12 w-full items-center rounded-xl border bg-white px-4 text-left text-sm outline-none transition-all ${
                                     isCategoryOpen
@@ -346,6 +398,12 @@ export default function TransactionModal({isOpen, onClose, categories}: {isOpen:
                     {/* Divider */}
                     <div className="border-t border-finsight-border-light" />
 
+                    {submitError && (
+                        <p role="alert" className="text-sm text-red-600">
+                            {submitError}
+                        </p>
+                    )}
+
                     {/* Actions */}
                     <div className="flex justify-end gap-3">
                         <button
@@ -357,10 +415,16 @@ export default function TransactionModal({isOpen, onClose, categories}: {isOpen:
                         </button>
 
                         <button
-                            type="submit"
-                            className="h-11 rounded-xl bg-finsight-primary px-6 text-sm font-semibold text-white shadow-sm transition-all hover:bg-finsight-primary-hover active:scale-[0.98]"
+                            type="submit" 
+                            disabled={isSubmitting}
+                            className="h-11 rounded-xl bg-finsight-primary px-6 text-sm font-semibold text-white shadow-sm transition-all hover:bg-finsight-primary-hover active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
                         >
-                            Add Transaction
+                            {isSubmitting ? (
+                                <span className="inline-flex items-center gap-2">
+                                    <Loader2 className="h-4 w-4 animate-spin motion-reduce:animate-none" aria-hidden="true" />
+                                    Saving...
+                                </span>
+                            ) : "Add Transaction"}
                         </button>
                     </div>
                 </form>

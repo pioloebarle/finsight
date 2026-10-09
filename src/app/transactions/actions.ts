@@ -4,8 +4,9 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { transactionSchema } from "@/lib/validation/transaction";
 import { toTransactionRow } from "@/lib/transactions";
+import type { CreateTransactionResult } from "@/types/dashboard"
 
-export async function createTransaction(formData: FormData) {
+export async function createTransaction(formData: FormData): Promise<CreateTransactionResult> {
     const userId = process.env.DEV_USER_ID;
     
     if(!userId){
@@ -64,6 +65,8 @@ export async function createTransaction(formData: FormData) {
 
         return {
             success: true,
+            description: result.data.description,
+            amountCentavos: transactionRow.amountCentavos,
         };
     } catch (error) {
         console.error("Failed to create transaction:", error);

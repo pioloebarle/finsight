@@ -13,4 +13,12 @@ export type TransactionView = {
   date: Date;
 };
 
+export type CreateTransactionResult =
+  | { success: true; description: string; amountCentavos: number }
+  | {
+      success: false;
+      message: string;
+      errors?: Partial<Record<"description" | "amount" | "type" | "date" | "categoryId", string[]>>;
+    };
+
 export type CategoryOption = { id: string; categoryName: string };
