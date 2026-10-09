@@ -12,3 +12,5 @@ export type TransactionView = {
   amountCentavos: number; 
   date: Date;
 };
+
+export type CategoryOptions = { id: string; categoryName: string };
