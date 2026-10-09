@@ -36,7 +36,7 @@ export default function SpendingBreakdown({ rows }: {rows: SpendingRowView[]}) {
                     </div>
 
                     {/* Amount */}
-                    <span className="w-24 shrink-0 text-right text-sm font-medium">
+                    <span className="w-24 shrink-0 text-right text-base font-medium">
                     ₱{(row.amountCentavos / 100).toFixed(2)}
                     </span>
 
