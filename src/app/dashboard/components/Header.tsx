@@ -1,6 +1,11 @@
+"use client";
 import Image from "next/image";
 import { Plus } from "lucide-react";
+import { useState, useMemo, useEffect } from "react";
+import TransactionModal from "./TransactionModal";
+
 export default function Header(){
+    const [isOpen, setIsOpen] = useState(false);
     return (
         <div>
             {/* Header */}
@@ -14,11 +19,19 @@ export default function Header(){
                 priority
                 />
 
-                <span>
-                <button className="flex items-center gap-2 bg-finsight-primary text-finsight-background p-3 rounded-finsight-lg font-medium hover:bg-finsight-primary-hover">
+                <button
+                    onClick = {() => setIsOpen(true)} 
+                    className="flex items-center gap-2 bg-finsight-primary text-finsight-background p-3 rounded-finsight-lg font-medium hover:bg-finsight-primary-hover"
+                >
                     <Plus className="w-4 h-4" /> Add Transaction
                 </button>
-                </span>
+
+                {isOpen && (
+                    <TransactionModal 
+                        isOpen = {isOpen}
+                        onClose= {() => setIsOpen(false)}
+                    />
+                )}
             </div>
         </div>
     )
