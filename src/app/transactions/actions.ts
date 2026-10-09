@@ -1,12 +1,19 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { transactionSchema } from "@/lib/validation/transaction";
 import { toTransactionRow } from "@/lib/transactions";
 
 export async function createTransaction(formData: FormData) {
     const userId = process.env.DEV_USER_ID;
-    if(!userId) throw new Error("DEV_USER_ID is not set in environment variables.");
+    
+    if(!userId){
+        return {
+            success: false,
+            message: "Server Configuration Error. Please try again.",
+        };
+    }
 
     const rawData = {
         description: formData.get("description"),
@@ -21,20 +28,49 @@ export async function createTransaction(formData: FormData) {
     if (!result.success) {
         return {
             success: false,
+            message: "Please check your transaction details",
             errors: result.error.flatten().fieldErrors,
         };
     }
 
-    const transactionRow = toTransactionRow(result.data);
+    try {
+        if (result.data.categoryId) {
+            const category = await prisma.category.findFirst({
+                where: {
+                    id: result.data.categoryId,
+                    userId,
+                },
+                select: { id: true },
+            });
 
-    await prisma.transaction.create({
-        data: {
-            userId,
-            ...transactionRow,
-        },
-    });
+            if (!category) {
+                return {
+                    success: false,
+                    message: "Invalid category selected. Please try again.",
+                };
+            }
+        }
 
-    return {
-        success: true,
-    };
+        const transactionRow = toTransactionRow(result.data);
+
+        await prisma.transaction.create({
+            data: {
+                userId,
+                ...transactionRow,
+            },
+        });
+
+        revalidatePath("/dashboard");
+
+        return {
+            success: true,
+        };
+    } catch (error) {
+        console.error("Failed to create transaction:", error);
+        return {
+            success: false,
+            message: "An unexpected error occurred. Please try again.",
+        };
+    }
+
 }

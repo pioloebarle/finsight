@@ -13,4 +13,4 @@ export type TransactionView = {
   date: Date;
 };
 
-export type CategoryOptions = { id: string; categoryName: string };
+export type CategoryOption = { id: string; categoryName: string };

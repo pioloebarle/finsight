@@ -7,6 +7,7 @@ import { getSpendingByCategory } from '@/lib/queries/spending';
 import { getRecentTransactions } from '@/lib/queries/transactions';
 import { parseMonthOrCurrent, monthToDate, shiftMonth, formatMonthParam } from '@/lib/validation/month';
 import { formatMonthYear, formatMonthRange } from '@/lib/format';
+import { getCategories } from '@/lib/queries/categories';
 import { SpendingRowView } from '@/types/dashboard';
 
 type PageProps = { searchParams: Promise<{ month?: string | string[] }> };
@@ -20,9 +21,10 @@ export default async function DashboardPage({ searchParams,}: PageProps) {
   const userId = process.env.DEV_USER_ID;
   if(!userId) throw new Error("DEV_USER_ID is not set in environment variables.");
 
-  const [spending, recent] = await Promise.all([
+  const [spending, recent, categories] = await Promise.all([
     getSpendingByCategory(userId, monthDate),
-    getRecentTransactions(userId, monthDate, 5)
+    getRecentTransactions(userId, monthDate, 5),
+    getCategories(userId)
   ]);
 
   const totalCentavos = Math.abs(spending.reduce((sum, row) => sum + row.totalCentavos, 0));
@@ -41,7 +43,7 @@ export default async function DashboardPage({ searchParams,}: PageProps) {
   return (
     <main className="min-h-screen bg-finsight-background">
       <div className="mx-auto w-full max-w-7xl px-5 py-8 lg:px-6">
-          <Header />
+          <Header categories={categories} />
 
           <hr className="my-3 border-t border-gray-300 mb-10" />
           

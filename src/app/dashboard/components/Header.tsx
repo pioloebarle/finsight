@@ -1,10 +1,11 @@
 "use client";
 import Image from "next/image";
 import { Plus } from "lucide-react";
-import { useState, useMemo, useEffect } from "react";
+import { useState } from "react";
 import TransactionModal from "./TransactionModal";
+import { CategoryOptions } from "@/lib/queries/categories";
 
-export default function Header(){
+export default function Header({ categories }: { categories: CategoryOptions[] }){
     const [isOpen, setIsOpen] = useState(false);
     return (
         <div>
@@ -30,6 +31,7 @@ export default function Header(){
                     <TransactionModal 
                         isOpen = {isOpen}
                         onClose= {() => setIsOpen(false)}
+                        categories = {categories}
                     />
                 )}
             </div>

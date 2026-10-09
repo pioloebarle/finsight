@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
     CalendarDays,
     ChevronDown,
@@ -9,31 +9,49 @@ import {
     CircleHelp,
     X,
 } from "lucide-react";
-import { categories } from "./transactionCategory";
+import type { CategoryOption } from "@/types/dashboard";
+import { getCategoryConfig } from "../data/categories";
 
 type TransactionType = "income" | "expense";
 
-export default function TransactionModal({isOpen, onClose}: {isOpen: boolean, onClose: () => void}) {
+export default function TransactionModal({isOpen, onClose, categories}: {isOpen: boolean, onClose: () => void, categories: CategoryOption[]}) {
     const [type, setType] = useState<TransactionType>("expense");
     const [isCategoryOpen, setIsCategoryOpen] = useState(false);
     const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+
+    useEffect(() => {
+    if (!isOpen) return;
+        const onKeyDown = (e: KeyboardEvent) => {
+            if (e.key === "Escape") onClose();
+        };
+        window.addEventListener("keydown", onKeyDown);
+        return () => window.removeEventListener("keydown", onKeyDown);
+    }, [isOpen, onClose]);
 
     if (!isOpen) {
         return null;
     }
 
+    // below the early return, a default date of "today" in Manila (en-CA formats as YYYY-MM-DD):
+    const todayInManila = new Date().toLocaleDateString("en-CA", { timeZone: "Asia/Manila" });
+
     return (
         <div className="fixed inset-0 z-50 flex animate-modal-backdrop items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
-            <div className="relative w-full max-w-4xl animate-modal-in rounded-finsight-lg border border-finsight-border bg-finsight-background p-8 shadow-xl">
+            <div 
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="transaction-modal-title"
+                className="relative w-full max-w-4xl animate-modal-in rounded-finsight-lg border border-finsight-border bg-finsight-background p-8 shadow-xl"
+            >
 
                 {/* Close Button */}
                 <button
                     type="button"
                     onClick={onClose}
-                    className="absolute right-6 top-6 flex h-9 w-9 items-center justify-center rounded-full text-finsight-muted transition-colors hover:bg-finsight-surface-soft hover:text-finsight-text"
+                    className="absolute right-6 top-6 flex h-9 w-9 items-center justify-center rounded-full bg-finsight-close-button-hover text-finsight-muted transition-colors hover:bg-finsight-close-button-active hover:text-finsight-text"
                     aria-label="Close transaction modal"
                 >
-                    <X className="h-5 w-5" />
+                    <X className="h-5 w-5 " />
                 </button>
 
                 {/* Header */}
@@ -42,7 +60,10 @@ export default function TransactionModal({isOpen, onClose}: {isOpen: boolean, on
                         New Transaction
                     </span>
 
-                    <h2 className="text-3xl font-semibold text-finsight-text">
+                    <h2 
+                        id="transaction-modal-title"
+                        className="text-3xl font-semibold text-finsight-text"
+                    >
                         Add Transaction
                     </h2>
 
@@ -53,7 +74,8 @@ export default function TransactionModal({isOpen, onClose}: {isOpen: boolean, on
 
                 {/* Form */}
                 <form className="space-y-6">
-
+                    <input type="hidden" name="type" value={type} />
+                    <input type="hidden" name="categoryId" value={selectedCategory ?? ""} />    
                     {/* Transaction Type */}
                     <div className="mb-7 w-full rounded-finsight-xl border border-finsight-gray-900 bg-finsight-surface p-4">
                         <div
@@ -113,6 +135,7 @@ export default function TransactionModal({isOpen, onClose}: {isOpen: boolean, on
                             id="description"
                             name="description"
                             type="text"
+                            required
                             placeholder="e.g. Groceries, Salary, etc."
                             maxLength={100}
                             className="h-12 w-full rounded-xl border border-finsight-border bg-white px-4 text-base text-finsight-text outline-none transition-all placeholder:text-finsight-muted focus:border-finsight-primary focus:ring-3 focus:ring-finsight-primary-soft"
@@ -146,6 +169,7 @@ export default function TransactionModal({isOpen, onClose}: {isOpen: boolean, on
                                     id="amount"
                                     name="amount"
                                     type="number"
+                                    required
                                     min="0"
                                     step="0.01"
                                     placeholder="0.00"
@@ -170,6 +194,8 @@ export default function TransactionModal({isOpen, onClose}: {isOpen: boolean, on
                                     id="date"
                                     name="date"
                                     type="date"
+                                    required
+                                    defaultValue={todayInManila}
                                     className="h-12 w-full rounded-xl border border-finsight-border bg-white pl-11 pr-4 text-base text-finsight-text outline-none transition-all focus:border-finsight-primary focus:ring-3 focus:ring-finsight-primary-soft"
                                 />
                             </div>
@@ -179,7 +205,7 @@ export default function TransactionModal({isOpen, onClose}: {isOpen: boolean, on
                     {/* Category */}
                     <div>
                         <label
-                            htmlFor="categoryId"
+                            id="category-label"
                             className="mb-2 block text-base font-semibold text-finsight-text"
                         >
                             Category{" "}
@@ -215,7 +241,7 @@ export default function TransactionModal({isOpen, onClose}: {isOpen: boolean, on
                                         ? categories.find(
                                             (category) =>
                                                 category.id === selectedCategory
-                                        )?.name
+                                        )?.categoryName
                                         : "Select a category"}
                                 </span>
 
@@ -269,7 +295,8 @@ export default function TransactionModal({isOpen, onClose}: {isOpen: boolean, on
 
                                     {/* Categories */}
                                     {categories.map((category) => {
-                                        const Icon = category.icon;
+                                        const config = getCategoryConfig(category.categoryName);
+                                        const Icon = config.icon;
                                         const isSelected =
                                             selectedCategory === category.id;
 
@@ -283,11 +310,9 @@ export default function TransactionModal({isOpen, onClose}: {isOpen: boolean, on
                                                     setSelectedCategory(category.id);
                                                     setIsCategoryOpen(false);
 
-                                                    if(category.id === "salary") {
-                                                        setType("income");
-                                                    } else {
-                                                        setType("expense");
-                                                    }
+                                                    const isSalary = 
+                                                        category.categoryName.toLowerCase() === "salary";
+                                                        setType(isSalary ? "income" : "expense");
                                                 }}
                                                 className={`flex w-full items-center rounded-lg px-3 py-2.5 text-left transition-colors ${
                                                     isSelected
@@ -297,13 +322,13 @@ export default function TransactionModal({isOpen, onClose}: {isOpen: boolean, on
                                             >
                                                 {/* Category icon */}
                                                 <span
-                                                    className={`mr-3 flex h-8 w-8 items-center justify-center rounded-lg ${category.iconClass}`}
+                                                    className={`mr-3 flex h-8 w-8 items-center justify-center rounded-lg ${config.iconClass}`}
                                                 >
                                                     <Icon className="h-4 w-4" />
                                                 </span>
 
                                                 <span className="flex-1 text-sm font-medium text-finsight-text">
-                                                    {category.name}
+                                                    {category.categoryName}
                                                 </span>
 
                                                 {isSelected && (
