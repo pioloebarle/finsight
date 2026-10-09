@@ -6,7 +6,7 @@ export default function DashboardHeader({ monthLabel, prevHref, nextHref }: { mo
         <div className="flex items-center justify-between mb-5">
             <div>
               <p className="text-base text-finsight-muted">Your Spending</p>
-              <h2 className="text-3xl font-semibold text-finsight-text">October 2026</h2> {/* Change to actual data */}
+              <h2 className="text-3xl font-semibold text-finsight-text">{monthLabel}</h2> {/* Change to actual data */}
             </div>
             <div className="flex items-center justify-center gap-5 bg-white p-2 rounded-finsight-lg border border-finsight-gray-500">
               <button 
