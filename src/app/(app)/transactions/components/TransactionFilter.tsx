@@ -1,8 +1,19 @@
 "use client";
 import { Search, SlidersHorizontal } from "lucide-react";
-import { useState } from "react";
 import { motion } from "motion/react";
 
+export type TransactionFilters = {
+    search: string;
+    type: string;
+    category: string;
+    dateRange: string;
+    sortOrder: string;
+};
+
+type TransactionFilterProps = {
+    filters: TransactionFilters;
+    onFiltersChange: (filters: TransactionFilters) => void;
+};
 
 const categories = [
     { label: "All Categories", value: "all" },
@@ -16,12 +27,13 @@ const categories = [
     { label: "Uncategorized", value: "uncategorized" },
 ];
 
-export default function TransactionFilter(){
-    const [search, setSearch] = useState("");
-    const [type, setType] = useState("all");
-    const [category, setCategory] = useState("all");
-    const [dateRange, setDateRange] = useState("all");
-    const [sortOrder, setSortOrder] = useState("newest");
+export default function TransactionFilter({ filters, onFiltersChange }: TransactionFilterProps) {
+
+    const { search, type, category, dateRange, sortOrder } = filters;
+
+    function updateFilter<K extends keyof TransactionFilters>(key: K, value: TransactionFilters[K]) {
+        onFiltersChange({ ...filters, [key]: value });
+    }
     
     return (
         <div>
@@ -36,9 +48,9 @@ export default function TransactionFilter(){
 
                     <input
                         type="search"
-                        placeholder="Search transactions..."
+                        placeholder="Search category, description..."
                         value={search}
-                        onChange={(event) => setSearch(event.target.value)}
+                        onChange={(event) => updateFilter("search", event.target.value)}
                         aria-label="Search transactions"
                         className="w-full rounded-finsight-lg border border-finsight-gray-500 bg-finsight-surface py-3 pl-12 pr-4 text-sm text-finsight-text outline-none transition placeholder:text-finsight-muted focus:border-finsight-primary focus:ring-2 focus:ring-finsight-primary/10"
                     />
@@ -64,7 +76,7 @@ export default function TransactionFilter(){
                                 <button
                                     key={item.value}
                                     type="button"
-                                    onClick={() => setType(item.value)}
+                                    onClick={() => updateFilter("type", item.value)}
                                     aria-pressed={isActive}
                                     className={`relative isolate rounded-md px-4 py-2 text-sm font-medium transition-colors duration-200 ${
                                         isActive
@@ -104,7 +116,7 @@ export default function TransactionFilter(){
                         <select
                             value={category}
                             onChange={(event) =>
-                                setCategory(event.target.value)
+                                updateFilter("category", event.target.value)
                             }
                             aria-label="Filter by category"
                             className="min-w-36 rounded-finsight-lg border border-finsight-gray-500 bg-finsight-surface px-3 py-2.5 text-sm text-finsight-text outline-none focus:border-finsight-primary"
@@ -123,7 +135,7 @@ export default function TransactionFilter(){
                         <select
                             value={dateRange}
                             onChange={(event) =>
-                                setDateRange(event.target.value)
+                                updateFilter("dateRange", event.target.value)
                             }
                             aria-label="Filter by date"
                             className="rounded-finsight-lg border border-finsight-gray-500 bg-finsight-surface px-3 py-2.5 text-sm text-finsight-text outline-none focus:border-finsight-primary"
@@ -138,7 +150,7 @@ export default function TransactionFilter(){
                         <select
                             value={sortOrder}
                             onChange={(event) =>
-                                setSortOrder(event.target.value)
+                                updateFilter("sortOrder", event.target.value)
                             }
                             aria-label="Sort transactions"
                             className="rounded-finsight-lg border border-finsight-gray-500 bg-finsight-surface px-3 py-2.5 text-sm text-finsight-text outline-none focus:border-finsight-primary"

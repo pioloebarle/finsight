@@ -1,7 +1,6 @@
 import Header from "./components/Header";
 import SummaryCards from "./components/SummaryCards";
-import TransactionFilter from "./components/TransactionFilter";
-import TransactionList from "./components/TransactionList";
+import TransactionBrowser from "./components/TransactionBrowser";
 import { getCategories } from '@/lib/queries/categories';
 import { formatMonthYear } from '@/lib/format';
 import { parseMonthOrCurrent, monthToDate } from '@/lib/validation/month';
@@ -32,9 +31,10 @@ export default async function TransactionPage({ searchParams }: PageProps) {
 
                 <SummaryCards />
                 
-                <TransactionFilter />
-
-                <TransactionList monthLabel={formatMonthYear(monthDate)} transactions={recent} />
+                <TransactionBrowser
+                    monthLabel={formatMonthYear(monthDate)}
+                    transactions={recent}
+                />
                
             </div>
         </main>
