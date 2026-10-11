@@ -39,7 +39,7 @@ export default function TransactionList({ monthLabel, transactions }: { monthLab
                     transactionYear === selectedYear
                 );
             })
-    }, [monthLabel]);
+    }, [monthLabel, transactions]);
 
     const visibleTransactions = monthTransactions.slice(0, visibleCount);
     const hasMore = visibleCount < monthTransactions.length;
