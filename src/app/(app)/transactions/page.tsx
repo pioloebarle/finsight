@@ -29,7 +29,7 @@ export default async function TransactionPage({ searchParams }: PageProps) {
 
                 <hr className="mb-10 mt-3 border-t border-gray-300" />
 
-                <SummaryCards />
+                <SummaryCards transactions={recent}/>
                 
                 <TransactionBrowser
                     monthLabel={formatMonthYear(monthDate)}
