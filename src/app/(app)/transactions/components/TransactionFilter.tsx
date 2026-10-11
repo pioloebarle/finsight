@@ -140,10 +140,11 @@ export default function TransactionFilter({ filters, onFiltersChange }: Transact
                             aria-label="Filter by date"
                             className="rounded-finsight-lg border border-finsight-gray-500 bg-finsight-surface px-3 py-2.5 text-sm text-finsight-text outline-none focus:border-finsight-primary"
                         >
-                            <option value="all">All time</option>
+                            <option value="thisMonth">This month</option>
                             <option value="7days">Last 7 days</option>
                             <option value="30days">Last 30 days</option>
-                            <option value="thisMonth">This month</option>
+                            <option value="thisYear">This year</option>
+                            <option value="allTime">All time</option>
                         </select>
 
                         {/* Sort Order */}

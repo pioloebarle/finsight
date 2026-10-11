@@ -4,24 +4,51 @@ import TransactionBrowser from "./components/TransactionBrowser";
 import MonthlyButton from "./components/MonthlyButton";
 import { getCategories } from '@/lib/queries/categories';
 import { formatMonthYear } from '@/lib/format';
-import { getTransactions } from "@/lib/queries/getTransactions";
+import { getTransactions, type TransactionDateRange } from "@/lib/queries/getTransactions";
 import { parseMonthOrCurrent, monthToDate, shiftMonth, formatMonthParam } from '@/lib/validation/month';
 
-type PageProps = { searchParams: Promise<{ month?: string | string[] }> };
+type PageProps = { searchParams: Promise<{ month?: string | string[]; range?: string | string[] }> };
+
+const validDateRanges: TransactionDateRange[] = [
+    "thisMonth",
+    "7days",
+    "30days",
+    "thisYear",
+    "allTime",
+];
+
+function parseDateRange(value: string | string[] | undefined): TransactionDateRange {
+    if (typeof value === "string" && validDateRanges.includes(value as TransactionDateRange)) {
+        return value as TransactionDateRange;
+    }
+
+    return "thisMonth";
+}
 
 export default async function TransactionPage({ searchParams }: PageProps) {
     
-    const { month: rawMonth } = await searchParams;
+    const { month: rawMonth, range: rawRange } = await searchParams;
     const parsed = parseMonthOrCurrent(typeof rawMonth === "string" ? rawMonth : undefined);
     const monthDate = monthToDate(parsed);
+    const dateRange = parseDateRange(rawRange);
 
     const userId = process.env.DEV_USER_ID;
     if(!userId) throw new Error("DEV_USER_ID is not set in environment variables.");
     
     const [recent, categories] = await Promise.all([
-        getTransactions(userId, monthDate),
+        getTransactions(userId, monthDate, dateRange),
         getCategories(userId)
     ]);
+
+    console.log("Selected range:", dateRange);
+    console.log("Selected month:", monthDate.toISOString());
+    console.log("Transactions returned:", recent.length);
+    console.log(
+        "Transaction dates:",
+        recent.map((transaction) =>
+            transaction.transactionDate.toISOString().slice(0, 10)
+        )
+    );
 
     return (
         <main className="min-h-screen bg-finsight-background">
@@ -30,16 +57,21 @@ export default async function TransactionPage({ searchParams }: PageProps) {
 
                 <hr className="mb-10 mt-3 border-t border-gray-300" />
 
-                <MonthlyButton
-                    monthLabel={formatMonthYear(monthDate)}
-                    prevHref={`?month=${formatMonthParam(shiftMonth(parsed, -1))}`}
-                    nextHref={`?month=${formatMonthParam(shiftMonth(parsed, 1))}`}
-                />
+                {dateRange === "thisMonth" && (
+                    <MonthlyButton
+                        monthLabel={formatMonthYear(monthDate)}
+                        prevHref={`?month=${formatMonthParam(shiftMonth(parsed, -1))}`}
+                        nextHref={`?month=${formatMonthParam(shiftMonth(parsed, 1))}`}
+                    />
+                )}
+
                 <SummaryCards transactions={recent}/>
                 
                 <TransactionBrowser
                     monthLabel={formatMonthYear(monthDate)}
                     transactions={recent}
+                    initialDateRange={dateRange}
+                    selectedMonth={monthDate}
                 />
                
             </div>

@@ -23,9 +23,7 @@ export const INITIAL_FILTERS: TransactionFilters = {
     sortOrder: "newest",
 };
 
-export function filterTransactions(transactions: Transaction[], filters: TransactionFilters, referenceDate: Date = new Date()): Transaction[] {
-    const now = new Date();
-
+export function filterTransactions(transactions: Transaction[], filters: TransactionFilters, referenceDate: Date = new Date(), selectedMonth?: Date,): Transaction[] {
     const today = new Date(Date.UTC(referenceDate.getFullYear(), referenceDate.getMonth(), referenceDate.getDate()));
 
     const filtered = transactions.filter((transaction) => {
@@ -77,6 +75,9 @@ export function filterTransactions(transactions: Transaction[], filters: Transac
             matchesDate = 
                 transactionDate.getUTCMonth() === today.getUTCMonth() && 
                 transactionDate.getUTCFullYear() === today.getUTCFullYear();
+        }
+        else if (filters.dateRange === "thisYear"){
+            matchesDate = transactionDate.getUTCFullYear() === today.getUTCFullYear();
         }
 
         return (

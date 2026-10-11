@@ -76,6 +76,7 @@ const applyFilters = (
 ) => {
   const filters: TransactionFilters = {
     ...INITIAL_FILTERS,
+    dateRange: "all",
     ...overrides,
   };
 
@@ -90,7 +91,7 @@ describe("filterTransactions", () => {
         search: "",
         type: "all",
         category: "all",
-        dateRange: "all",
+        dateRange: "thisMonth",
         sortOrder: "newest",
       });
     });

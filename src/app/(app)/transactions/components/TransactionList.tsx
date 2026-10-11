@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { ChevronDown, ChevronRight } from "lucide-react";
 import { getCategoryConfig } from "@/app/(app)/dashboard/data/categories"
 import { formatMonthDay, formatSignedCurrency } from "@/lib/format";
@@ -14,6 +14,19 @@ type Transaction = {
     transactionDate: Date;
 }
 
+type TransactionDateRange =
+    | "thisMonth"
+    | "7days"
+    | "30days"
+    | "thisYear"
+    | "allTime";
+
+type TransactionListProps = {
+    monthLabel: string;
+    dateRange: TransactionDateRange;
+    transactions: Transaction[];
+};
+
 const INITIAL_VISIBLE_COUNT = 10;
 const LOAD_MORE_COUNT = 10;
 
@@ -21,39 +34,30 @@ function isIncomeTransaction(amountCentavos: number): boolean {
     return amountCentavos > 0;
 }
 
-export default function TransactionList({ monthLabel, transactions }: { monthLabel: string, transactions: Transaction[] }) {
+export default function TransactionList({ monthLabel, dateRange, transactions }: TransactionListProps) {
     const [visibleCount, setVisibleCount] = useState(INITIAL_VISIBLE_COUNT);
 
-    const monthTransactions = useMemo(() => {
-        return transactions
-            .filter((transaction) => {
-                const transactionMonth = transaction.transactionDate.getMonth();
-                const transactionYear = transaction.transactionDate.getFullYear(); 
+    const visibleTransactions = transactions.slice(0, visibleCount);
+    const hasMore = visibleCount < transactions.length;
 
-                const selectedDate = new Date(`${monthLabel} 1`);
-                const selectedMonth = selectedDate.getMonth();
-                const selectedYear = selectedDate.getFullYear();
-
-                return (
-                    transactionMonth === selectedMonth &&
-                    transactionYear === selectedYear
-                );
-            })
-    }, [monthLabel, transactions]);
-
-    const visibleTransactions = monthTransactions.slice(0, visibleCount);
-    const hasMore = visibleCount < monthTransactions.length;
+    const heading = {
+        thisMonth: monthLabel,
+        "7days": "Last 7 Days",
+        "30days": "Last 30 Days",
+        thisYear: "This Year",
+        allTime: "All Transactions",
+    }[dateRange];
 
     return (
         <section className="mt-8">
             {/* List Header */}
             <div className="mb-3 flex items-center justify-between gap-3">
                 <h2 className="text-lg font-semibold text-finsight-text">
-                    {monthLabel}
+                    {heading}
                 </h2>
 
                 <span className="text-xs text-finsight-muted sm:text-sm">
-                    {monthTransactions.length} transactions
+                    {transactions.length} transactions
                 </span>
             </div>
 
@@ -112,24 +116,24 @@ export default function TransactionList({ monthLabel, transactions }: { monthLab
                 })}
 
                 {/* Empty State */}
-                {monthTransactions.length === 0 && (
+                {transactions.length === 0 && (
                     <div className="py-12 text-center">
                         <p className="text-sm font-medium text-finsight-text">
                             No transactions found
                         </p>
                         <p className="mt-1 text-sm text-finsight-muted">
-                            Transactions for this month will appear here.
+                            Try adjusting your filters or adding a new transaction.
                         </p>
                     </div>
                 )}
             </div>
 
             {/* Load More */}
-            {monthTransactions.length > 0 && (
+            {transactions.length > 0 && (
                 <div className="flex flex-col items-center gap-3 border-t border-finsight-gray-500 py-5">
                     <p className="text-xs text-finsight-muted sm:text-sm">
                         Showing {visibleTransactions.length} of{" "}
-                        {monthTransactions.length} transactions
+                        {transactions.length} transactions
                     </p>
 
                     {hasMore && (
@@ -139,7 +143,7 @@ export default function TransactionList({ monthLabel, transactions }: { monthLab
                                 setVisibleCount((current) =>
                                     Math.min(
                                         current + LOAD_MORE_COUNT,
-                                        monthTransactions.length,
+                                        transactions.length,
                                     ),
                                 )
                             }

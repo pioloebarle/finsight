@@ -1,7 +1,7 @@
 "use client";
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
-export default function DashboardHeader({ monthLabel, prevHref, nextHref }: { monthLabel: string; prevHref: string; nextHref: string }) {
+export default function MonthlyButton({ monthLabel, prevHref, nextHref }: { monthLabel: string; prevHref: string; nextHref: string }) {
     return (
         <div className="flex items-center flex-start mb-5">
             <div className="flex items-center justify-center gap-5 bg-white p-2 rounded-finsight-lg border border-finsight-gray-500">
