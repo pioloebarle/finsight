@@ -1,10 +1,11 @@
 import Header from "./components/Header";
 import SummaryCards from "./components/SummaryCards";
 import TransactionBrowser from "./components/TransactionBrowser";
+import MonthlyButton from "./components/MonthlyButton";
 import { getCategories } from '@/lib/queries/categories';
 import { formatMonthYear } from '@/lib/format';
-import { parseMonthOrCurrent, monthToDate } from '@/lib/validation/month';
 import { getTransactions } from "@/lib/queries/getTransactions";
+import { parseMonthOrCurrent, monthToDate, shiftMonth, formatMonthParam } from '@/lib/validation/month';
 
 type PageProps = { searchParams: Promise<{ month?: string | string[] }> };
 
@@ -29,6 +30,11 @@ export default async function TransactionPage({ searchParams }: PageProps) {
 
                 <hr className="mb-10 mt-3 border-t border-gray-300" />
 
+                <MonthlyButton
+                    monthLabel={formatMonthYear(monthDate)}
+                    prevHref={`?month=${formatMonthParam(shiftMonth(parsed, -1))}`}
+                    nextHref={`?month=${formatMonthParam(shiftMonth(parsed, 1))}`}
+                />
                 <SummaryCards transactions={recent}/>
                 
                 <TransactionBrowser

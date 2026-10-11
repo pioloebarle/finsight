@@ -19,7 +19,7 @@ export const INITIAL_FILTERS: TransactionFilters = {
     search: "",
     type: "all",
     category: "all",
-    dateRange: "all",
+    dateRange: "thisMonth",
     sortOrder: "newest",
 };
 
