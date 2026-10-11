@@ -17,9 +17,9 @@ X,
 
 const navigation = [
     { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-    { label: "Transactions", href: "/dashboard/transactions", icon: ArrowLeftRight },
-    { label: "Statistics", href: "/dashboard/statistics", icon: ChartNoAxesCombined },
-    { label: "Settings", href: "/dashboard/settings", icon: Settings },
+    { label: "Transactions", href: "/transactions", icon: ArrowLeftRight },
+    { label: "Statistics", href: "/statistics", icon: ChartNoAxesCombined },
+    { label: "Settings", href: "/settings", icon: Settings },
 ];
 
 type SidebarProps = {

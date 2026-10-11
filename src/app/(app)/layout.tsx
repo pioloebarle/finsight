@@ -1,4 +1,4 @@
-import DashboardShell from "./components/DashboardShell";
+import DashboardShell from "./dashboard/components/DashboardShell";
 
 export default function DashboardLayout({ children, }: Readonly<{ children: React.ReactNode; }>) {
 

@@ -1,11 +1,10 @@
 "use client";
-import Image from "next/image";
 import { Plus } from "lucide-react";
 import { useState } from "react";
-import TransactionModal from "./TransactionModal";
+import TransactionModal from "../../dashboard/components/TransactionModal";
 import { CategoryOptions } from "@/lib/queries/categories";
 
-export default function Header({ categories }: { categories: CategoryOptions[] }){
+export default function Header({ categories }: { categories: CategoryOptions[] }) {
     const [isOpen, setIsOpen] = useState(false);
     return (
         <div>
@@ -13,7 +12,7 @@ export default function Header({ categories }: { categories: CategoryOptions[] }
             <header className="flex min-h-14 items-center justify-between gap-4">
                     
                 <h1 className="text-2xl font-semibold tracking-tight text-finsight-text sm:text-3xl">
-                    Dashboard
+                    Transactions
                 </h1>
 
 

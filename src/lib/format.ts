@@ -44,3 +44,7 @@ export function formatSignedCurrency(centavos: number): string {
   if (centavos < 0) return `-${text}`;
   return text;
 }
+
+export function formatMonthDay(monthDate: Date): string {
+  return monthDayFormatter.format(monthDate);
+}

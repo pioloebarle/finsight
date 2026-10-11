@@ -14,7 +14,7 @@ import { toast } from "sonner";
 import { formatSignedCurrency } from "@/lib/format";
 import type { CategoryOption } from "@/types/dashboard";
 import { getCategoryConfig } from "../data/categories";
-import { createTransaction } from "@/app/transactions/actions";
+import { createTransaction } from "@/app/(app)/transactions/actions";
 
 type TransactionType = "income" | "expense";
 

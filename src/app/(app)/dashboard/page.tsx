@@ -12,7 +12,7 @@ import { SpendingRowView } from '@/types/dashboard';
 
 type PageProps = { searchParams: Promise<{ month?: string | string[] }> };
 
-export default async function DashboardPage({ searchParams,}: PageProps) {
+export default async function DashboardPage({ searchParams }: PageProps) {
 
   const { month: rawMonth } = await searchParams;
   const parsed = parseMonthOrCurrent(typeof rawMonth === "string" ? rawMonth : undefined);
