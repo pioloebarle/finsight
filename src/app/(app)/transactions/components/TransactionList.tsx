@@ -14,8 +14,8 @@ type Transaction = {
     transactionDate: Date;
 }
 
-const INITIAL_VISIBLE_COUNT = 5;
-const LOAD_MORE_COUNT = 5;
+const INITIAL_VISIBLE_COUNT = 10;
+const LOAD_MORE_COUNT = 10;
 
 function isIncomeTransaction(amountCentavos: number): boolean {
     return amountCentavos > 0;
