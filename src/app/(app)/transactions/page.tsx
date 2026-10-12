@@ -40,16 +40,6 @@ export default async function TransactionPage({ searchParams }: PageProps) {
         getCategories(userId)
     ]);
 
-    console.log("Selected range:", dateRange);
-    console.log("Selected month:", monthDate.toISOString());
-    console.log("Transactions returned:", recent.length);
-    console.log(
-        "Transaction dates:",
-        recent.map((transaction) =>
-            transaction.transactionDate.toISOString().slice(0, 10)
-        )
-    );
-
     return (
         <main className="min-h-screen bg-finsight-background">
             <div className="mx-auto w-full max-w-screen-2xl px-5 py-8 lg:px-6">

@@ -16,7 +16,7 @@ type TransactionBrowserProps = {
     selectedMonth?: Date;
 };
 
-export default function TransactionBrowser({ monthLabel, transactions, initialDateRange = "thisMonth", selectedMonth }: TransactionBrowserProps) {
+export default function TransactionBrowser({ monthLabel, transactions, initialDateRange = "thisMonth" }: TransactionBrowserProps) {
 
     const router = useRouter();
     const searchParams = useSearchParams();
@@ -57,10 +57,9 @@ export default function TransactionBrowser({ monthLabel, transactions, initialDa
             filterTransactions(
                 transactions,
                 { ...filters, dateRange: "allTime" },
-                new Date(),
-                selectedMonth
+                new Date()
             ),
-        [transactions, filters, selectedMonth]
+        [transactions, filters]
     );
 
     return (

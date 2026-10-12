@@ -60,20 +60,6 @@ export async function getTransactions(
         };
     }
     
-    const dateStats = await prisma.transaction.aggregate({
-        where: { userId },
-        _min: { transactionDate: true },
-        _max: { transactionDate: true },
-        _count: { _all: true },
-    });
-
-    console.log("Transaction date stats:", {
-        total: dateStats._count._all,
-        earliest: dateStats._min.transactionDate,
-        latest: dateStats._max.transactionDate,
-    });
-
-
     const rows = await prisma.transaction.findMany({
         where: {
             userId,

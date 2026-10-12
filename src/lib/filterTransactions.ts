@@ -23,7 +23,7 @@ export const INITIAL_FILTERS: TransactionFilters = {
     sortOrder: "newest",
 };
 
-export function filterTransactions(transactions: Transaction[], filters: TransactionFilters, referenceDate: Date = new Date(), selectedMonth?: Date,): Transaction[] {
+export function filterTransactions(transactions: Transaction[], filters: TransactionFilters, referenceDate: Date = new Date()): Transaction[] {
     const today = new Date(Date.UTC(referenceDate.getFullYear(), referenceDate.getMonth(), referenceDate.getDate()));
 
     const filtered = transactions.filter((transaction) => {
