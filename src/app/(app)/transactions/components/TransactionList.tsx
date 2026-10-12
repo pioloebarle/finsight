@@ -2,6 +2,8 @@
 "use client";
 
 import { useState } from "react";
+import TransactionDetailDrawer from "@/app/(app)/components/TransactionDetailDrawer";
+import type { TransactionDetail } from "@/app/(app)/components/TransactionDetailDrawer";
 import { ChevronDown, ChevronRight } from "lucide-react";
 import { getCategoryConfig } from "@/app/(app)/dashboard/data/categories"
 import { formatMonthDay, formatSignedCurrency } from "@/lib/format";
@@ -36,6 +38,7 @@ function isIncomeTransaction(amountCentavos: number): boolean {
 
 export default function TransactionList({ monthLabel, dateRange, transactions }: TransactionListProps) {
     const [visibleCount, setVisibleCount] = useState(INITIAL_VISIBLE_COUNT);
+    const [selectedTransaction, setSelectedTransaction] = useState<TransactionDetail | null>(null);
 
     const visibleTransactions = transactions.slice(0, visibleCount);
     const hasMore = visibleCount < transactions.length;
@@ -72,9 +75,15 @@ export default function TransactionList({ monthLabel, dateRange, transactions }:
                     const isIncome = isIncomeTransaction(transaction.amountCentavos);
 
                     return (
-                        <div
+                        <button
                             key={`${transaction.description}-${transaction.transactionDate.toISOString()}-${index}`}
-                            className="p-4 group flex items-center gap-3 py-4 transition-colors hover:bg-finsight-surface/70 sm:gap-4"
+                            type="button"
+                            onClick={() => setSelectedTransaction(transaction)}
+                            className="group flex w-full items-center gap-3 py-4 px-4 text-left
+                                transition-colors hover:bg-finsight-surface/70
+                                focus-visible:outline-2 focus-visible:outline-inset
+                                focus-visible:outline-finsight-primary
+                                sm:gap-4"
                         >
                             {/* Category Icon */}
                             <div
@@ -111,7 +120,7 @@ export default function TransactionList({ monthLabel, dateRange, transactions }:
                                     className="h-4 w-4 text-finsight-muted transition-transform group-hover:translate-x-0.5"
                                 />
                             </div>
-                        </div>
+                        </button>
                     );
                 })}
 
@@ -155,7 +164,11 @@ export default function TransactionList({ monthLabel, dateRange, transactions }:
                     )}
                 </div>
             )}
-            
+        
+            <TransactionDetailDrawer
+                transaction={selectedTransaction}
+                onClose={() => setSelectedTransaction(null)}
+            />
         </section>
     )
 }
